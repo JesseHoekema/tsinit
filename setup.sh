@@ -1,28 +1,52 @@
-#!/bin/bash
-
 set -e
+RESET='\033[0m'
+BOLD='\033[1m'
+BLUE='\033[34m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
 
-echo "🚀 Creating TypeScript project..."
+confirm() {
+    read -p "$(echo -e "${BOLD}??${RESET} $1 [y/N]: ")" choice
+    [[ "$choice" =~ ^[Yy]$ ]]
+}
+
+
+clear
+echo -e "${BLUE}${BOLD}tsinit${RESET} | TypeScript Project Generator"
+echo "------------------------------------------"
+
+
+echo -e "${BOLD}Select a project template:${RESET}"
+echo "1) Starter (Simple console.log)"
+echo "2) Test Logic (Greet + Add functions)"
+read -p "Selection [1-2]: " template_choice
+
 
 if [ ! -f package.json ]; then
-  pnpm init
+    pnpm init > /dev/null 2>&1
 fi
 
-pnpm add -D typescript tsx @types/node
+echo -n "?? Installing dependencies... "
+pnpm add -D typescript tsx @types/node > /dev/null 2>&1
+echo -e "${GREEN}Done${RESET}"
+
 
 mkdir -p src
+if [ "$template_choice" = "2" ]; then
+    cat <<EOL > src/index.ts
+const greet = (name: string): string => \`Hello, \${name}!\`;
+const add = (a: number, b: number): number => a + b;
 
-if [ ! -f src/index.ts ]; then
-  cat <<EOL > src/index.ts
-const greet = (name: string): string => {
-  return \`Hello, \${name}!\`;
-};
-
-console.log(greet("World"));
+console.log(greet("Developer"));
+console.log(\`Total: \${add(5, 10)}\`);
+EOL
+else
+    cat <<EOL > src/index.ts
+console.log("Hello World");
 EOL
 fi
 
-# Create tsconfig.json
+
 cat <<EOL > tsconfig.json
 {
   "compilerOptions": {
@@ -39,46 +63,30 @@ cat <<EOL > tsconfig.json
 }
 EOL
 
-# Create .gitignore
-if [ ! -f .gitignore ]; then
-  cat <<EOL > .gitignore
+
+if confirm "Add .gitignore?"; then
+    cat <<EOL > .gitignore
 node_modules
 dist
 .DS_Store
 *.log
 EOL
-  echo "📄 Created .gitignore"
 fi
 
-# Create README.md
-cat <<EOL > README.md
-# TypeScript Project
+if confirm "Add README.md (with tsinit credits)?"; then
+    cat <<EOL > README.md
 
-This project was initialized using [tsinit](https://github.com/JesseHoekema/tsinit).
 
-## Getting Started
+Initialized with [tsinit](https://github.com/JesseHoekema/tsinit).
 
-### Development
-To run the project in development mode with auto-reloading:
-\`\`\`bash
-pnpm dev
-\`\`\`
 
-### Build
-To compile the TypeScript code to JavaScript:
-\`\`\`bash
-pnpm build
-\`\`\`
-
-### Production
-To run the compiled JavaScript code:
-\`\`\`bash
-pnpm start
-\`\`\`
+- Dev: \`pnpm dev\`
+- Build: \`pnpm build\`
+- Start: \`pnpm start\`
 EOL
-echo "📄 Created README.md"
+fi
 
-# Add scripts safely using Node
+
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json'));
@@ -89,9 +97,7 @@ pkg.scripts = {
   start: 'node dist/index.js'
 };
 fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-"
+" > /dev/null 2>&1
 
-echo "✅ Done!"
-echo ""
-echo "Run development mode with:"
-echo "pnpm dev"
+echo -e "\n${GREEN}🚀 Project ready.${RESET}"
+echo -e "Run ${YELLOW}pnpm dev${RESET} to start."

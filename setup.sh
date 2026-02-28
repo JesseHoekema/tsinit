@@ -4,14 +4,18 @@ set -e
 
 echo "🚀 Setting up TypeScript project..."
 
+# Initialize package.json if it doesn't exist
 if [ ! -f package.json ]; then
   pnpm init
 fi
 
+# Install core dependencies
 pnpm add -D typescript tsx @types/node
 
+# Create source directory
 mkdir -p src
 
+# Create a sample index file
 if [ ! -f src/index.ts ]; then
   cat <<EOL > src/index.ts
 const greet = (name: string): string => {
@@ -39,7 +43,18 @@ cat <<EOL > tsconfig.json
 }
 EOL
 
-# Add scripts safely
+# Create .gitignore
+if [ ! -f .gitignore ]; then
+  cat <<EOL > .gitignore
+node_modules
+dist
+.DS_Store
+*.log
+EOL
+  echo "📄 Added .gitignore"
+fi
+
+# Add scripts to package.json safely using Node
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json'));
@@ -54,5 +69,7 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 
 echo "✅ Done!"
 echo ""
-echo "Run development mode with:"
-echo "pnpm dev"
+echo "To get started:"
+echo "  1. Run development mode:  pnpm dev"
+echo "  2. Build for production:  pnpm build"
+echo "  3. Run the build:         pnpm start"

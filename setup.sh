@@ -2,20 +2,16 @@
 
 set -e
 
-echo "🚀 Setting up TypeScript project..."
+echo "🚀 Creating TypeScript project..."
 
-# Initialize package.json if it doesn't exist
 if [ ! -f package.json ]; then
   pnpm init
 fi
 
-# Install core dependencies
 pnpm add -D typescript tsx @types/node
 
-# Create source directory
 mkdir -p src
 
-# Create a sample index file
 if [ ! -f src/index.ts ]; then
   cat <<EOL > src/index.ts
 const greet = (name: string): string => {
@@ -51,10 +47,38 @@ dist
 .DS_Store
 *.log
 EOL
-  echo "📄 Added .gitignore"
+  echo "📄 Created .gitignore"
 fi
 
-# Add scripts to package.json safely using Node
+# Create README.md
+cat <<EOL > README.md
+# TypeScript Project
+
+This project was initialized using [tsinit](https://github.com/JesseHoekema/tsinit).
+
+## Getting Started
+
+### Development
+To run the project in development mode with auto-reloading:
+\`\`\`bash
+pnpm dev
+\`\`\`
+
+### Build
+To compile the TypeScript code to JavaScript:
+\`\`\`bash
+pnpm build
+\`\`\`
+
+### Production
+To run the compiled JavaScript code:
+\`\`\`bash
+pnpm start
+\`\`\`
+EOL
+echo "📄 Created README.md"
+
+# Add scripts safely using Node
 node -e "
 const fs = require('fs');
 const pkg = JSON.parse(fs.readFileSync('package.json'));
@@ -69,7 +93,5 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
 
 echo "✅ Done!"
 echo ""
-echo "To get started:"
-echo "  1. Run development mode:  pnpm dev"
-echo "  2. Build for production:  pnpm build"
-echo "  3. Run the build:         pnpm start"
+echo "Run development mode with:"
+echo "pnpm dev"
